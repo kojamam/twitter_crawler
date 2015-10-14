@@ -16,12 +16,12 @@ class mongoQueue
 
 	public function enqueue($data)
 	{
-		return $this->insert($data);
+		return $this->col->insert($data);
 	}
 
 	public function dequeue()
 	{
-		if($this->is_empty == false){
+		if($this->is_empty() == false){
 			$cur = $this->col->find()->sort(array("_id" => 1))->limit(1);
 			$arr = iterator_to_array($cur);
 			$id = array_keys($arr)[0];

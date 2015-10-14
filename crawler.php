@@ -7,8 +7,10 @@ require_once 'config.php';
 // DBへ接続してコレクションを指定
 $mongo = new Mongo();
 $db = $mongo->selectDB(DB_NAME);
-$col = $db->selectCollection(DATA_COLLECTION_NAME);
+$dataCol = $db->selectCollection(DATA_COLLECTION_NAME);
 $queue = $db->selectCollection(QUEUE_COLLECTION_NAME);
+
+$queue = new mongoQueue(DB_NAME, QUEUE_COLLECTION_NAME);
 
 //Twitter OAuth認証
 try {
@@ -17,20 +19,23 @@ try {
 	echo  $e->getMessage();
 }
 
-//はじめのユーザのidを取得
-try{
-	$user = $to->get('users/show', array('screen_name' => START_SCREEN_NAME));
-	$userId = $user->id;
-}catch(TwistException $e){
-	echo $e->getMessage();
+//キューが空の時
+if($queue->is_empty() == true){
+	//はじめのユーザのidを取得
+	try{
+		$user = $to->get('users/show', array('screen_name' => START_SCREEN_NAME));
+		$userId = $user->id;
+	}catch(TwistException $e){
+		echo $e->getMessage();
+	}
+
+	$queue->enqueue(array("user_id" => $userId));
 }
 
-$queue->enqueue($userId);
-
-//キューを使って取得
+//キューを使ってfriendsを取得
 for ($i=0; $i < 1000; $i++) { 
 
-	$userId = $queue->dequeue();
+	$userId = $queue->dequeue()["user_id"];
 
 	$limitation = getLimit($to);
 
@@ -43,22 +48,23 @@ for ($i=0; $i < 1000; $i++) {
 	try{
 		$friends = $to->get('friends/ids', array("user_id" => $userId));
 	}catch(TwistException $e){
-		echo $e->getMessage();
+		echo $e->getMessage(), "\n";
 	}
 
 	$data = new stdClass();
 
 	$data->user_id = $userId;
 	$data->friends = $friends->ids;
-	$col->insert($data);
+	$dataCol->insert($data);
 
 	foreach ($data->friends as $key => $tUserId) {
-		if($col->findOne(array('user_id' => $tUserId)) == null){
-			$queue->enqueue($tUserId);
+		if($dataCol->findOne(array('user_id' => $tUserId)) == null){
+			$queue->enqueue(array("user_id" => $tUserId));
 		}
 	}
 
 	echo "{$i}. id: {$userId} \n";
+
 	sleep(1);
 }
 
