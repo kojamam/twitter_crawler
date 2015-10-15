@@ -21,8 +21,10 @@ if($queue->is_empty() == true){
 	file_put_contents("log.txt", '----crawling starts from @'.INITIAL_SCREEN_NAME.'----'."\n\n");
 }
 
+$i = $dataCol->count();
+
 //キューを使ってfriendsを幅優先で取得
-for ($i=0; $i < 1000; $i++) { 
+for (; $i < MAX; $i++) { 
 
 	$userId = $queue->dequeue()["user_id"];
 

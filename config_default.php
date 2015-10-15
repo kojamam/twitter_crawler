@@ -10,3 +10,5 @@ define('ACCESS_TOKEN', '');
 define('ACCESS_TOKEN_SECRET', '');
 
 define('INITIAL_SCREEN_NAME', '');
+
+define('MAX', 0);
