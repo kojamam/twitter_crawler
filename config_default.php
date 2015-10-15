@@ -9,4 +9,4 @@ define('CONSUMER_SECRET', '');
 define('ACCESS_TOKEN', '');
 define('ACCESS_TOKEN_SECRET', '');
 
-define('START_SCREEN_NAME', '');
+define('INITIAL_SCREEN_NAME', '');
