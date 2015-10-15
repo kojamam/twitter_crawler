@@ -18,7 +18,7 @@ $twitter = new Twitter(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN
 if($queue->is_empty() == true){
 	$userId = $twitter->getUserIdFromScreenName(INITIAL_SCREEN_NAME);
 	$queue->enqueue(array("user_id" => $userId));
-	file_put_contents("log.txt", "----crawling starts from " + INITIAL_SCREEN_NAME + "----\n\n");
+	file_put_contents("log.txt", '----crawling starts from @'.INITIAL_SCREEN_NAME.'----'."\n\n");
 }
 
 //キューを使ってfriendsを幅優先で取得
@@ -37,13 +37,12 @@ for ($i=0; $i < 1000; $i++) {
 		echo "sleeping...", "\n";
 		sleep(300);
 		$limitation = $twitter->getFrendIdsAPILimit();
-	}	
-
-	$friendIds = $twitter->getFriendIds($userId);
+	}
 
 	$data = new stdClass();
 	$data->user_id = $userId;
-	$data->friends = $friendIds;
+	$data->screen_name = $twitter->getScreenNameFromUserId($userId);
+	$data->friends = $twitter->getFriendIds($userId);
 	$dataCol->insert($data);
 
 	foreach ($data->friends as $key => $waitingUserId) {

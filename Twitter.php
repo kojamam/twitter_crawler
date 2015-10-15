@@ -31,6 +31,18 @@ class Twitter
 		return $userId;
 	}
 
+	public function getScreenNameFromUserId($userId)
+	{
+		try{
+			$user = $this->con->get('users/show', array('user_id' => $userId));
+			$screenName = $user->screen_name;
+		}catch(TwistException $e){
+			echo $e->getMessage(), "\n";
+		}
+
+		return $screenName;
+	}
+
 	public function getFriendIds($userId)
 	{
 		try{
