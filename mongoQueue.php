@@ -38,4 +38,11 @@ class mongoQueue
 	{
 		return $this->col->count() == 0;
 	}
+
+	public function isEnqueued($param)
+	{
+
+		return $this->col->count($param) == 0 ? false : true;
+	}
+
 }

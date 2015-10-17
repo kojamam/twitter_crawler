@@ -42,7 +42,7 @@ for (; $i < MAX; $i++) {
 	$screenName = $twitter->getScreenNameFromUserId($userId);
 	if($twitter->isProtected($userId)) {
 		$i--;
-		echo $msg = "skipped: id = {$userId},\tscreen_name = {$screenName}\n";
+		echo $msg = "skipped:\tid = {$userId},\tscreen_name = {$screenName}\n";
 		file_put_contents($logFile, $msg,  FILE_APPEND);
 		continue;
 	}
@@ -54,15 +54,17 @@ for (; $i < MAX; $i++) {
 	$data->friends = $twitter->getFriendIds($userId);
 	$dataCol->insert($data);
 
-	// まだ取得してないアカウントのidのみキューに入れる
+	// まだ取得してないかつキューにも入っていないアカウントのidのみキューに入れる
 	foreach ($data->friends as $key => $waitingUserId) {
-		$enqueued = $dataCol->count(array('user_id' => $waitingUserId));
-		if($enqueued == 0){
+		$param = array('user_id' => $waitingUserId);
+		$collected = $dataCol->count($param) == 0 ? false : true;
+		$enqueued = $queue->isEnqueued($param);
+		if(!$collected && !$enqueued){
 			$queue->enqueue(array("user_id" => $waitingUserId));
 		}
 	}
 
-	echo $msg = "inserted: {$i}. id = {$userId},\tscreen_name = {$screenName}\n";
+	echo $msg = "inserted({$i}): id = {$userId},\tscreen_name = {$screenName}\n";
 	file_put_contents($logFile, $msg,  FILE_APPEND);
 
 	$data = null;
