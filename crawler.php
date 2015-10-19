@@ -27,7 +27,7 @@ if($queue->is_empty() == true){
 $i = $dataCol->count();
 
 //キューを使ってfriendsを幅優先で取得
-for (; $i < MAX; $i++) { 
+for (; $i < MAX; $i++) {
 
 	// API制限かかっているかの確認。かかっていたら5分待つ
 	$limitation = $twitter->getFrendIdsAPILimit();
@@ -42,10 +42,13 @@ for (; $i < MAX; $i++) {
 	$screenName = $twitter->getScreenNameFromUserId($userId);
 	if($twitter->isProtected($userId)) {
 		$i--;
-		echo $msg = "skipped:\tid = {$userId},\tscreen_name = {$screenName}\n";
+		echo $msg = "スキップ:\tid = {$userId},\tscreen_name = {$screenName}\n";
 		file_put_contents($logFile, $msg,  FILE_APPEND);
 		continue;
 	}
+
+	echo "ターゲット({$i}):\tid = {$userId},\tscreen_name = {$screenName}...";
+
 
 	//各種データを取得、オブジェクトのメンバに代入
 	$data = new stdClass();
@@ -64,7 +67,7 @@ for (; $i < MAX; $i++) {
 		}
 	}
 
-	echo $msg = "inserted({$i}): id = {$userId},\tscreen_name = {$screenName}\n";
+	echo $msg = "完了\n";
 	file_put_contents($logFile, $msg,  FILE_APPEND);
 
 	$data = null;
